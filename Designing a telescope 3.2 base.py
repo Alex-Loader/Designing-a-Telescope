@@ -5,18 +5,9 @@ Created on Wed Mar 25 10:31:35 2020
 @author: Alex
 """
 
-
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Feb 13 12:05:31 2020
-
-@author: Alex
-"""
-
 import numpy as np 
 import matplotlib.pyplot as plt
 
-plt.close("all")
 
 """Star and Instrument function"""
 """Needs to calculate the power of the star reaching our detector, and then the
