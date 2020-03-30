@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Mar 24 10:36:05 2020
-
-@author: Alex
-"""
-
 import numpy as np 
 import matplotlib.pyplot as plt
 
@@ -15,20 +8,21 @@ plt.close("all")
 amount of electrons created from the photon count"""
 
 #Defining important constants:
-c=3e8 #speed of light
-h=6.626e-34 #Planck constant
-kb=1.38e-23 #Boltzmann constant
-G=6.67e-11 #Gravitational Constant
-sigma=5.67e-8 #Stefan-Boltzmann constant
-ly=9.46e15 #1 Light Year in metres
-pc=3.26 #1 parsec in light years
-Atm_Mass = 1.66e-27 #Atomic Mass Unit
+c=299792458 #speed of light
+h=6.62607004e-34 #Planck constant
+kb=1.38064852e-23 #Boltzmann constant
+G=6.67408e-11 #Gravitational Constant
+sigma=5.670374419e-8 #Stefan-Boltzmann constant
+ly=9460730472580800  #1 Light Year in metres
+pc=3.26156 #1 parsec in light years
+Atm_Mass = 1.66054e-27 #Atomic Mass Unit
 
-Rs=696.34e6 #Radius of the sun
-Ms=1.989e30 #Mass of the sun
-Re=6.371e6 #Radius of the Earth
-Me=5.97e24 #Mass of the Earth
-
+Rs=6.96342e8 #Radius of the sun
+Ms=1.98847e30 #Mass of the sun
+Re=6.378137e6 #Radius of the Earth
+Me=5.9723e24 #Mass of the Earth
+Albedo=0.3 #Albedo of Earth
+L_sun = 382.8e24 #Luminosity of Sun
 
 def Star_and_Detector (Lambda, T, R, rad, D, R_power): 
     #Lambda = Wavelength, T = Temperature of star, R=Radius of the star, 
@@ -62,7 +56,7 @@ def Transit (M, R, r, a):
     R = R*Rs
     r = r*Re
     
-    a_m = a * 1.5e11 #semi-major axis in metres 
+    a_m = a * 149597870700 #semi-major axis in metres 
     
     Period_s = 2*np.pi * np.sqrt(a_m**3 / (G * M))
     Period = Period_s / (365.25 * 24 * 60 * 60)
@@ -93,7 +87,7 @@ def Atmosphere(T, R, r, m, a_m, mu):
     
     g=G*m/r**2 #calculating gravitational acceleration needed for scale height of the atmosphere
 
-    T_atm =  T * np.sqrt(R / (2 * a_m)) 
+    T_atm =  288 #Using 288K as simulating Earth analogue planet
     
     H = kb * T_atm / (g * mu)  #In metres
     A = (10 * r * H / R**2) #ppm
@@ -132,12 +126,13 @@ Period_Array = np.zeros(4)
 A_Array = np.zeros(4)
 T14_Array = np.zeros(4)
 Ap_Array = np.zeros(4)
+a_Array = np.zeros(4)
 
 
 #Hypothetical varying space telescope
 Lambda = np.linspace(500e-9,12000e-9,12000)
-rad = 2    
-R_power_100 = 40
+rad = 4   
+R_power_100 = 100
 QE = 0.8
 Opt_eff = 0.5
 atm_eff = 1
@@ -148,10 +143,11 @@ T = 2559
 M = 0.0802
 R = 0.117
 D = 10
+L_star = 4 * np.pi * Rs**2 * sigma * T**4
 #Planet
 m = 1
 r = 1
-a = (R*Rs) / (2 * (280 / T)**2) / 1.5e11
+a = np.sqrt(L_star / L_sun)
 mu = 28.97 
 
 Photon_Count, Signal, Bin_size = Star_and_Detector(Lambda, T, R, rad, D, R_power_100)
@@ -165,6 +161,7 @@ Period_Array[0] = Period_d
 A_Array[0] = a_m
 T14_Array[0] = T14
 Ap_Array[0] = A
+a_Array[0] = a
 
 
 
@@ -174,11 +171,11 @@ T = 4925
 M = 0.69
 R = 0.64
 D = 10
+L_star = 4 * np.pi * Rs**2 * sigma * T**4
 #Planet
 m = 1
 r = 1
-a = (R*Rs) / (2 * (280 / T)**2) / 1.5e11
-mu = 28.97 
+a = np.sqrt(L_star / L_sun)
 
 Photon_Count, Signal, Bin_size = Star_and_Detector(Lambda, T, R, rad, D, R_power_100)
 T14, Period, Period_d, Period_s, Blocked, a_m, v, v2 = Transit(M, R, r, a) 
@@ -191,7 +188,7 @@ Period_Array[1] = Period_d
 A_Array[1] = a_m
 T14_Array[1] = T14
 Ap_Array[1] = A
-
+a_Array[1] = a
 
 #Earth and Sol (G2V)
 #Star
@@ -199,11 +196,11 @@ T = 5778
 M = 1
 R = 1
 D = 10
+L_star = 4 * np.pi * Rs**2 * sigma * T**4
 #Planet
 m = 1
 r = 1
-a = (R*Rs) / (2 * (280 / T)**2) / 1.5e11
-mu = 28.97 
+a = np.sqrt(L_star / L_sun)
 
 Photon_Count, Signal, Bin_size = Star_and_Detector(Lambda, T, R, rad, D, R_power_100)
 T14, Period, Period_d, Period_s, Blocked, a_m, v, v2 = Transit(M, R, r, a) 
@@ -216,7 +213,7 @@ Period_Array[2] = Period_d
 A_Array[2] = a_m
 T14_Array[2] = T14
 Ap_Array[2] = A
-
+a_Array[2] = a
 
 #Earth and Tau Bootis (F7IV)
 #Star
@@ -224,11 +221,11 @@ T = 6400
 M = 1.34
 R = 1.46
 D = 10
+L_star = 4 * np.pi * Rs**2 * sigma * T**4
 #Planet
 m = 1
 r = 1
-a = (R*Rs) / (2 * (280 / T)**2) / 1.5e11
-mu = 28.97 
+a = np.sqrt(L_star / L_sun)
 
 Photon_Count, Signal, Bin_size = Star_and_Detector(Lambda, T, R, rad, D, R_power_100)
 T14, Period, Period_d, Period_s, Blocked, a_m, v, v2 = Transit(M, R, r, a) 
@@ -241,7 +238,7 @@ Period_Array[3] = Period_d
 A_Array[3] = a_m
 T14_Array[3] = T14
 Ap_Array[3] = A
-
+a_Array[3] = a
 
 plt.ylabel("Number of Transits")
 plt.xlabel("Wavelength Observed (m)")
@@ -262,11 +259,11 @@ T = 2559
 M = 0.0802
 R = 0.117
 D = 10
+L_star = 4 * np.pi * Rs**2 * sigma * T**4
 #Planet
 m = 1
 r = 1
-a = (R*Rs) / (2 * (280 / T)**2) / 1.5e11
-mu = 28.97 
+a = np.sqrt(L_star / L_sun)
 
 Photon_Count, Signal, Bin_size = Star_and_Detector(Lambda, T, R, rad, D, R_power_100)
 T14, Period, Period_d, Period_s, Blocked, a_m, v, v2 = Transit(M, R, r, a) 
@@ -282,11 +279,11 @@ T = 4925
 M = 0.69
 R = 0.64
 D = 10
+L_star = 4 * np.pi * Rs**2 * sigma * T**4
 #Planet
 m = 1
 r = 1
-a = (R*Rs) / (2 * (280 / T)**2) / 1.5e11
-mu = 28.97 
+a = np.sqrt(L_star / L_sun)
 
 Photon_Count, Signal, Bin_size = Star_and_Detector(Lambda, T, R, rad, D, R_power_100)
 T14, Period, Period_d, Period_s, Blocked, a_m, v, v2 = Transit(M, R, r, a) 
@@ -304,11 +301,11 @@ T = 5778
 M = 1
 R = 1
 D = 10
+L_star = 4 * np.pi * Rs**2 * sigma * T**4
 #Planet
 m = 1
 r = 1
-a = (R*Rs) / (2 * (280 / T)**2) / 1.5e11
-mu = 28.97 
+a = np.sqrt(L_star / L_sun)
 
 Photon_Count, Signal, Bin_size = Star_and_Detector(Lambda, T, R, rad, D, R_power_100)
 T14, Period, Period_d, Period_s, Blocked, a_m, v, v2 = Transit(M, R, r, a) 
@@ -325,11 +322,11 @@ T = 6400
 M = 1.34
 R = 1.46
 D = 10
+L_star = 4 * np.pi * Rs**2 * sigma * T**4
 #Planet
 m = 1
 r = 1
-a = (R*Rs) / (2 * (280 / T)**2) / 1.5e11
-mu = 28.97 
+a = np.sqrt(L_star / L_sun)
 
 Photon_Count, Signal, Bin_size = Star_and_Detector(Lambda, T, R, rad, D, R_power_100)
 T14, Period, Period_d, Period_s, Blocked, a_m, v, v2 = Transit(M, R, r, a) 
@@ -356,11 +353,12 @@ T = 2559
 M = 0.0802
 R = 0.117
 D = 10
+L_star = 4 * np.pi * Rs**2 * sigma * T**4
 #Planet
 m = 1
 r = 1
-a = (R*Rs) / (2 * (280 / T)**2) / 1.5e11
-mu = 28.97 
+a = np.sqrt(L_star / L_sun)
+
 
 Photon_Count, Signal, Bin_size = Star_and_Detector(Lambda, T, R, rad, D, R_power_100)
 T14, Period, Period_d, Period_s, Blocked, a_m, v, v2 = Transit(M, R, r, a) 
@@ -382,11 +380,12 @@ T = 4925
 M = 0.69
 R = 0.64
 D = 10
+L_star = 4 * np.pi * Rs**2 * sigma * T**4
 #Planet
 m = 1
 r = 1
-a = (R*Rs) / (2 * (280 / T)**2) / 1.5e11
-mu = 28.97 
+a = np.sqrt(L_star / L_sun)
+
 
 Photon_Count, Signal, Bin_size = Star_and_Detector(Lambda, T, R, rad, D, R_power_100)
 T14, Period, Period_d, Period_s, Blocked, a_m, v, v2 = Transit(M, R, r, a) 
@@ -407,11 +406,12 @@ T = 5778
 M = 1
 R = 1
 D = 10
+L_star = 4 * np.pi * Rs**2 * sigma * T**4
 #Planet
 m = 1
 r = 1
-a = (R*Rs) / (2 * (280 / T)**2) / 1.5e11
-mu = 28.97 
+a = np.sqrt(L_star / L_sun)
+
 
 Photon_Count, Signal, Bin_size = Star_and_Detector(Lambda, T, R, rad, D, R_power_100)
 T14, Period, Period_d, Period_s, Blocked, a_m, v, v2 = Transit(M, R, r, a) 
@@ -432,11 +432,11 @@ T = 6400
 M = 1.34
 R = 1.46
 D = 10
+L_star = 4 * np.pi * Rs**2 * sigma * T**4
 #Planet
 m = 1
 r = 1
-a = (R*Rs) / (2 * (280 / T)**2) / 1.5e11
-mu = 28.97 
+a = np.sqrt(L_star / L_sun)
 
 Photon_Count, Signal, Bin_size = Star_and_Detector(Lambda, T, R, rad, D, R_power_100)
 T14, Period, Period_d, Period_s, Blocked, a_m, v, v2 = Transit(M, R, r, a) 
@@ -470,11 +470,12 @@ T = 2559
 M = 0.0802
 R = 0.117
 D = 10
+L_star = 4 * np.pi * Rs**2 * sigma * T**4
 #Planet
 m = 1
 r = 1
-a = (R*Rs) / (2 * (280 / T)**2) / 1.5e11
-mu = 28.97 
+a = np.sqrt(L_star / L_sun)
+ 
 
 Photon_Count, Signal, Bin_size = Star_and_Detector(Lambda, T, R, rad, D, R_power_100)
 T14, Period, Period_d, Period_s, Blocked, a_m, v, v2 = Transit(M, R, r, a) 
@@ -496,11 +497,12 @@ T = 4925
 M = 0.69
 R = 0.64
 D = 10
+L_star = 4 * np.pi * Rs**2 * sigma * T**4
 #Planet
 m = 1
 r = 1
-a = (R*Rs) / (2 * (280 / T)**2) / 1.5e11
-mu = 28.97 
+a = np.sqrt(L_star / L_sun)
+
 
 Photon_Count, Signal, Bin_size = Star_and_Detector(Lambda, T, R, rad, D, R_power_100)
 T14, Period, Period_d, Period_s, Blocked, a_m, v, v2 = Transit(M, R, r, a) 
@@ -521,11 +523,12 @@ T = 5778
 M = 1
 R = 1
 D = 10
+L_star = 4 * np.pi * Rs**2 * sigma * T**4
 #Planet
 m = 1
 r = 1
-a = (R*Rs) / (2 * (280 / T)**2) / 1.5e11
-mu = 28.97 
+a = np.sqrt(L_star / L_sun)
+
 
 Photon_Count, Signal, Bin_size = Star_and_Detector(Lambda, T, R, rad, D, R_power_100)
 T14, Period, Period_d, Period_s, Blocked, a_m, v, v2 = Transit(M, R, r, a) 
@@ -546,11 +549,12 @@ T = 6400
 M = 1.34
 R = 1.46
 D = 10
+L_star = 4 * np.pi * Rs**2 * sigma * T**4
 #Planet
 m = 1
 r = 1
-a = (R*Rs) / (2 * (280 / T)**2) / 1.5e11
-mu = 28.97 
+a = np.sqrt(L_star / L_sun)
+
 
 Photon_Count, Signal, Bin_size = Star_and_Detector(Lambda, T, R, rad, D, R_power_100)
 T14, Period, Period_d, Period_s, Blocked, a_m, v, v2 = Transit(M, R, r, a) 
@@ -584,11 +588,12 @@ T = 2559
 M = 0.0802
 R = 0.117
 D = 10
+L_star = 4 * np.pi * Rs**2 * sigma * T**4
 #Planet
 m = 1
 r = 1
-a = (R*Rs) / (2 * (280 / T)**2) / 1.5e11
-mu = 28.97 
+a = np.sqrt(L_star / L_sun)
+
 
 Photon_Count, Signal, Bin_size = Star_and_Detector(Lambda, T, R, rad, D, R_power_100)
 T14, Period, Period_d, Period_s, Blocked, a_m, v, v2 = Transit(M, R, r, a) 
@@ -610,11 +615,12 @@ T = 4925
 M = 0.69
 R = 0.64
 D = 10
+L_star = 4 * np.pi * Rs**2 * sigma * T**4
 #Planet
 m = 1
 r = 1
-a = (R*Rs) / (2 * (280 / T)**2) / 1.5e11
-mu = 28.97 
+a = np.sqrt(L_star / L_sun)
+
 
 Photon_Count, Signal, Bin_size = Star_and_Detector(Lambda, T, R, rad, D, R_power_100)
 T14, Period, Period_d, Period_s, Blocked, a_m, v, v2 = Transit(M, R, r, a) 
@@ -635,11 +641,12 @@ T = 5778
 M = 1
 R = 1
 D = 10
+L_star = 4 * np.pi * Rs**2 * sigma * T**4
 #Planet
 m = 1
 r = 1
-a = (R*Rs) / (2 * (280 / T)**2) / 1.5e11
-mu = 28.97 
+a = np.sqrt(L_star / L_sun)
+
 
 Photon_Count, Signal, Bin_size = Star_and_Detector(Lambda, T, R, rad, D, R_power_100)
 T14, Period, Period_d, Period_s, Blocked, a_m, v, v2 = Transit(M, R, r, a) 
@@ -660,11 +667,12 @@ T = 6400
 M = 1.34
 R = 1.46
 D = 10
+L_star = 4 * np.pi * Rs**2 * sigma * T**4
 #Planet
 m = 1
 r = 1
-a = (R*Rs) / (2 * (280 / T)**2) / 1.5e11
-mu = 28.97 
+a = np.sqrt(L_star / L_sun)
+
 
 Photon_Count, Signal, Bin_size = Star_and_Detector(Lambda, T, R, rad, D, R_power_100)
 T14, Period, Period_d, Period_s, Blocked, a_m, v, v2 = Transit(M, R, r, a) 
@@ -687,3 +695,4 @@ plt.title("Mission Duration for Atmosphere Spectroscopy of Exoplanet Systems")
 plt.legend(loc="best")
 txt="This simulation used an R power of 100, a mirror of radius 2m with QE=0.8, Optical Efficiency=0.5"
 plt.figtext(0.5, 0.01, txt, wrap=True, horizontalalignment='center', fontsize=12)
+
